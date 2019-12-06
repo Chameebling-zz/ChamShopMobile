@@ -20,7 +20,7 @@ function send(...)
 	if not id then
 		error("no id specified", 2)
 	end
-    rednet.send(id, {...},"csm")
+    rednet.send(id, {"func",...},"csm")
 	repeat
 		local rid, msg = rednet.receive("csm",1)
 	until rid==id
@@ -42,7 +42,8 @@ while true do
         local width = msg[2]
         if rid==opID or rid==reID then
             busy = true
-            rednet.broadcast("busy","csm")
+            rednet.send(opID,"busy","csm")
+            rednet.send(reID,"busy","csm")
         end
         if rid==opID then
             print("Received connection from Operator")
@@ -53,7 +54,8 @@ while true do
             print("Connected to ID: "..tid)
             print()
 			id = tid
-			rcm = send("window","create",{"_G","term"},0,0,10,10,true)
+			rcm = send("window","create",{"func","term","current"},0,0,10,10,true)
+			rcm.setBackgroundColor(colors.lightGray)
             shell.run("register",tid,width)
         end
     end

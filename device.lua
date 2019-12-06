@@ -44,22 +44,35 @@ end
 local function runMsg(c)
 	local l = #c
 	local msgType = c[1]
-	if ((msgType=="func" or msgType=="var" or msgType=="impRcl") and l<3) or (msgType=="impSto" and l<4) then
+	local msgCat = ((msgType=="func" or msgType=="var" or msgType=="impRcl") and 0) or (msgType=="impSto" and 1)
+	if (magCat==0 and l<3) or (msgCat==1 and l<4) then
 		return c
 	end
 	
-	
-	
-	local api = c[2]
-	local func = c[3]
-	for i = 4, l do
-		if type(c[i])=="table" then
-			c[i] = runMsg(c[i])
+	if msgCat==0 then
+		
+		-- Set Implicit Values and Functions
+		local api = c[2]
+		local func = c[3]
+		
+		-- Check for things to handle in arguments
+		for i = 4, l do
+			if type(c[i])=="table" then
+				c[i] = runMsg(c[i])
+			end
 		end
-	end
-	local prompt = _G[api][func]
-	for i = 1, 3 do
-		table.remove(c,1)
+		
+		-- Sets up the function/variable
+		local prompt = msgType=="rcl" and imp[api] or _G[api][func]
+		
+		-- Removes the first 3 values of the table, which are before the arguments
+		for i = 1, 3 do
+			table.remove(c,1)
+		end
+		
+		if l==3 then
+			
+		end
 	end
 	if l==3 then
 		if msgType=="func" then

@@ -1,8 +1,9 @@
+shell.run("wget","https://git.io/aeslua","aeslua")
+
 local version = "Beta 0.2"
 
 local passKey = "Do not edit. Re-install ChamShop Mobile if you do so."
 
-local imp = {}
 local width, height = term.getSize()
 local id
 
@@ -25,6 +26,8 @@ local function startup()
 	term.write("Launching ChamShop Mobile!")
 	term.setCursorPos(cenLeft(24),cenTop(1)+1)
 	term.write("Connecting to Servers...")
+	term.setCursorPos(1,1)
+	print("WARNING: Beware of counterfeit programs! Do not trust computers given from other players! Keep your computer on you at all times!")
 end
 
 local function locateRednet()
@@ -44,8 +47,13 @@ end
 local function runMsg(c)
 	local l = #c
 	local msgType = c[1]
-	local msgCat = ((msgType=="func" or msgType=="var" or msgType=="impRcl") and 0) or (msgType=="impSto" and 1)
-	if (magCat==0 and l<3) or (msgCat==1 and l<4) then
+	local msgCat = -1
+	if (msgType=="func" or msgType=="var" or msgType=="impRcl") then
+		msgCat = 0
+	elseif msgType=="impSto" then
+		msgCat = 1
+	end
+	if (msgCat==0 and l<3) or (msgCat==1 and l<4) or msgCat==-1 then
 		return c
 	end
 	
@@ -63,7 +71,7 @@ local function runMsg(c)
 		end
 		
 		-- Sets up the function/variable
-		local prompt = msgType=="rcl" and imp[api] or _G[api][func]
+		local prompt = _G[api][func]
 		
 		-- Removes the first 3 values of the table, which are before the arguments
 		for i = 1, 3 do
@@ -71,20 +79,42 @@ local function runMsg(c)
 		end
 		
 		if l==3 then
-			
+			if msgType=="func" then
+				return prompt()
+			elseif msgType=="var" then
+				return prompt
+			elseif msgType=="impRcl" then
+				return _G["csm_"..api].prompt()
+			end
+		elseif l>3 then
+			if msgType=="func" then
+				return prompt(unpack(c))
+			elseif msgType=="impRcl" then
+				return _G["csm_"..api].prompt(unpack(c))
+			end
 		end
-	end
-	if l==3 then
-		if msgType=="func" then
-			return prompt()
-		elseif msgType=="var" then
-			return prompt
-		elseif msgType=="impSto" then
-			imp[]
+	elseif msgCat==1 and msgType=="impSto" then
+		local var = c[2]
+		local api = c[3]
+		local func = c[4]
+		for i = 5, l do
+			if type(c[i])=="table" then
+				c[i] = runMsg(c[i])
+			end
 		end
-		return var and prompt or prompt()
-	elseif l>=4 and not var then
-		return prompt(unpack(c))
+		
+		local prompt = _G[api][func]
+		
+		for i = 1, 4 do
+			table.remove(c,1)
+		end
+		
+		if l==4 then
+			_G["csm_"..var] = prompt()
+		elseif l>4 then
+			_G["csm_"..var] = prompt(unpack(c))
+		end
+		return _G["csm_"..var]
 	end
 end
 

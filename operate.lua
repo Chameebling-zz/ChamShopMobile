@@ -1,8 +1,25 @@
-local targs = {...}
-local timeout = 300
+local cards = {}
+cards["cart"] = {"My Cart"}
+cards["deliver"] = {"My Delivery Methods"}
+cards["pickup"] = {"My Pickup Methods"}
+cards["vending"] = {"My Vending Machine"}
 
-local buttons = {}
+local function homeScreen()
 
-local id = tonumber(targs[1])
-local width = tonumber(targs[2] or 26)
-local height = tonumber(targs[3] or 20)
+end
+
+local function cartScreen()
+
+end
+
+local function deliverScreen()
+
+end
+
+local function pickupScreen()
+
+end
+
+local function vendingScreen()
+
+end
